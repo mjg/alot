@@ -36,6 +36,7 @@ class Thread:
             thread = self._dbman._get_notmuch_thread(self._id)
 
         self._total_messages = thread.get_total_messages()
+        self._matched_messages = thread.get_matched_messages()
         self._notmuch_authors_string = thread.get_authors()
 
         subject_type = settings.get('thread_subject')
@@ -279,6 +280,10 @@ class Thread:
     def get_total_messages(self):
         """returns number of contained messages"""
         return self._total_messages
+
+    def get_matched_messages(self):
+        """returns number of contained messages"""
+        return self._matched_messages
 
     def matches(self, query):
         """

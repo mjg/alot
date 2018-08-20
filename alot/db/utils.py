@@ -450,12 +450,18 @@ def remove_cte(part, as_string=False):
         except LookupError:
             # enc is unknown;
             # fall back to guessing the correct encoding using libmagic
-            sp = helper.try_decode(bp)
+            try:
+                sp = helper.try_decode(bp)
+            except LookupError:
+                sp = '[Cannot decode. Use togglesource, Luke.]'
         except UnicodeDecodeError as emsg:
             # the mail contains chars that are not enc-encoded.
             # libmagic works better than just ignoring those
             logging.debug('Decoding failure: {}'.format(emsg))
-            sp = helper.try_decode(bp)
+            try:
+                sp = helper.try_decode(bp)
+            except LookupError:
+                sp = '[Cannot decode. Use togglesource, Luke.]'
         return sp
     return bp
 

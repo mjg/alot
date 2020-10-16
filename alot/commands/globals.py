@@ -543,7 +543,11 @@ class OpenBufferlistCommand(Command):
     def apply(self, ui):
         blists = ui.get_buffers_of_type(buffers.BufferlistBuffer)
         if blists:
-            ui.buffer_focus(blists[0])
+            buf = blists[0]
+            buf.filtfun = self.filtfun
+            buf.tags = tags
+            buf.rebuild()
+            ui.buffer_focus(buf)
         else:
             bl = buffers.BufferlistBuffer(ui, self.filtfun)
             ui.buffer_open(bl)
@@ -569,6 +573,7 @@ class TagListCommand(Command):
         blists = ui.get_buffers_of_type(buffers.TagListBuffer)
         if blists:
             buf = blists[0]
+            buf.filtfun = self.filtfun
             buf.tags = tags
             buf.rebuild()
             ui.buffer_focus(buf)

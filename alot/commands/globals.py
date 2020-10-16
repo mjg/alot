@@ -585,7 +585,13 @@ class NamedQueriesCommand(Command):
         Command.__init__(self, **kwargs)
 
     def apply(self, ui):
-        ui.buffer_open(buffers.NamedQueriesBuffer(ui))
+        blists = ui.get_buffers_of_type(buffers.NamedQueriesBuffer)
+        if blists:
+            buf = blists[0]
+            buf.rebuild()
+            ui.buffer_focus(buf)
+        else:
+            ui.buffer_open(buffers.NamedQueriesBuffer(ui))
 
 
 @registerCommand(MODE, 'flush')

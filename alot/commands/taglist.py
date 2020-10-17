@@ -13,12 +13,31 @@ MODE = 'taglist'
 @registerCommand(MODE, 'select')
 class TaglistSelectCommand(Command):
 
-    """search for messages with selected tag"""
+    """search for messages with selected tag within original buffer"""
     async def apply(self, ui):
         try:
-            tagstring = ui.current_buffer.get_selected_tag()
+            tagstring = 'tag:"%s"' % ui.current_buffer.get_selected_tag()
         except AttributeError:
             logging.debug("taglist select without tag selection")
             return
-        cmd = SearchCommand(query=['tag:"%s"' % tagstring])
+        querystring = ui.current_buffer.querystring
+        if querystring:
+            fullquerystring = '(%s) AND %s' % (querystring, tagstring)
+        else:
+            fullquerystring = tagstring
+        cmd = SearchCommand(query=[fullquerystring])
+        await ui.apply_command(cmd)
+
+
+@registerCommand(MODE, 'globalselect')
+class TaglistGlobalSelectCommand(Command):
+
+    """search for messages with selected tag"""
+    async def apply(self, ui):
+        try:
+            tagstring = 'tag:"%s"' % ui.current_buffer.get_selected_tag()
+        except AttributeError:
+            logging.debug("taglist globalselect without tag selection")
+            return
+        cmd = SearchCommand(query=[tagstring])
         await ui.apply_command(cmd)

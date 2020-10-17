@@ -555,13 +555,14 @@ class OpenBufferlistCommand(Command):
 
 
 @registerCommand(MODE, 'taglist', arguments=[
+    (['--msgs'], {'action': 'store_true', 'help': 'list tags from displayed messages'}),
     (['--tags'], {'nargs': '+', 'help': 'tags to display'}),
     (['match'], {'nargs': '?', 'help': 'regular expression to match'}),
 ])
 class TagListCommand(Command):
 
     """opens taglist buffer"""
-    def __init__(self, filtfun=lambda x: True, tags=None, match=None, **kwargs):
+    def __init__(self, filtfun=lambda x: True, tags=None, match=None, msgs=False, **kwargs):
         """
         :param filtfun: filter to apply to displayed list
         :type filtfun: callable (str->bool)
@@ -573,11 +574,20 @@ class TagListCommand(Command):
             self.filtfun = lambda x: pattern.search(x) is not None
         else:
             self.filtfun = filtfun
+        self.msgs = msgs
         self.tags = tags
         Command.__init__(self, **kwargs)
 
     def apply(self, ui):
-        tags = self.tags or ui.dbman.get_all_tags()
+        if self.tags:
+            tags = self.tags
+        elif self.msgs and isinstance(ui.current_buffer, buffers.SearchBuffer):
+            tags = list(ui.dbman.query(ui.current_buffer.querystring).
+                                          search_messages().collect_tags())
+        elif self.msgs and isinstance(ui.current_buffer, buffers.ThreadBuffer):
+            tags = list(ui.current_buffer.thread.get_tags())
+        else:
+            tags = ui.dbman.get_all_tags()
         blists = ui.get_buffers_of_type(buffers.TagListBuffer)
         if blists:
             buf = blists[0]

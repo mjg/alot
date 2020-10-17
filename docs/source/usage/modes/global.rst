@@ -230,5 +230,6 @@ The following commands are available globally:
         regular expression to match
 
     optional arguments
+        :---msgs: list tags from displayed messages
         :---tags: tags to display
 

@@ -13,6 +13,11 @@ class TaglistSelectCommand(Command):
 
     """search for messages with selected tag"""
     async def apply(self, ui):
-        tagstring = ui.current_buffer.get_selected_tag()
-        cmd = SearchCommand(query=['tag:"%s"' % tagstring])
+        tagstring = 'tag:"%s"' % ui.current_buffer.get_selected_tag()
+        querystring = ui.current_buffer.querystring
+        if querystring:
+            fullquerystring = '(%s) AND %s' % (querystring, tagstring)
+        else:
+            fullquerystring = tagstring
+        cmd = SearchCommand(query=[fullquerystring])
         await ui.apply_command(cmd)

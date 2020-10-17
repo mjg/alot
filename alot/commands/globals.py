@@ -579,13 +579,16 @@ class TagListCommand(Command):
         Command.__init__(self, **kwargs)
 
     def apply(self, ui):
+        querystring = None
         if self.tags:
             tags = self.tags
         elif self.msgs and isinstance(ui.current_buffer, buffers.SearchBuffer):
             tags = list(ui.dbman.query(ui.current_buffer.querystring).
                                           search_messages().collect_tags())
+            querystring = ui.current_buffer.querystring
         elif self.msgs and isinstance(ui.current_buffer, buffers.ThreadBuffer):
             tags = list(ui.current_buffer.thread.get_tags())
+            querystring = 'thread:%s' % ui.current_buffer.thread.get_thread_id()
         else:
             tags = ui.dbman.get_all_tags()
         blists = ui.get_buffers_of_type(buffers.TagListBuffer)
@@ -593,10 +596,11 @@ class TagListCommand(Command):
             buf = blists[0]
             buf.filtfun = self.filtfun
             buf.tags = tags
+            buf.querystring = querystring
             buf.rebuild()
             ui.buffer_focus(buf)
         else:
-            ui.buffer_open(buffers.TagListBuffer(ui, tags, self.filtfun))
+            ui.buffer_open(buffers.TagListBuffer(ui, tags, self.filtfun, querystring))
 
 
 @registerCommand(MODE, 'namedqueries')
